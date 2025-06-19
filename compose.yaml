@@ -1,0 +1,48 @@
+services:
+  commiter:
+    build:
+      context: .
+      dockerfile: docker/ghBot.Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      - NODE_ENV=production
+    networks:
+      - microservices-network
+    env_file:
+        - apps/ghBot/.env
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/server.Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    networks:
+      - microservices-network
+    depends_on:
+      - mongo
+    env_file:
+      - apps/server/.env
+
+  mongo:
+      image: mongo:6.0
+      ports:
+        - '27018:27017'
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=admin
+        - MONGO_INITDB_ROOT_PASSWORD=secret
+      volumes:
+        - mongo-data:/data/db
+      networks:
+        - microservices-network
+
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  microservices-network:
+    driver: bridge

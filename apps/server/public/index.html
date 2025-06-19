@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Button Links</title>
+    <style>
+      .pushable {
+        background: hsl(340deg, 100%, 32%);
+        border-radius: 12px;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        outline-offset: 4px;
+        margin: 10px;
+      }
+      .front {
+        display: block;
+        padding: 16px 48px;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        background: hsl(345deg, 100%, 47%);
+        color: white;
+        transform: translateY(-6px);
+        transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+      }
+      .pushable:hover .front {
+        transform: translateY(-4px);
+        transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+      }
+      .pushable:active .front {
+        transform: translateY(-2px);
+        transition: transform 34ms;
+      }
+      .pushable:focus:not(:focus-visible) {
+        outline: none;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      class="pushable"
+      onclick="window.location.href='https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liTvR87mmKv1HAby'"
+    >
+      <span class="front">GitHub OAuth</span>
+    </button>
+    <button class="pushable" onclick="window.location.href='/oauth/emails'">
+      <span class="front">OAuth Emails</span>
+    </button>
+  </body>
+</html>
