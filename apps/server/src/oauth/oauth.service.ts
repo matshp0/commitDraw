@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { request } from 'undici';
 import { Octokit } from '@octokit/rest';
@@ -24,17 +24,19 @@ export class OauthService {
   async authCallback(code: string) {
     const accessToken = await this.#getAccessToken(code);
     const uuid = crypto.randomUUID();
+    const emails = await this.#fetchEmails(accessToken);
     await this.userModel.create({
       id: uuid,
       ghAccessToken: accessToken,
       lastCheckedAt: new Date(),
+      emails,
     });
     return uuid;
   }
 
   async getEmails(req: Request) {
-    const { ghAccessToken } = req;
-    const emails = await this.#fetchEmails(ghAccessToken!);
+    const { user } = req;
+    const emails = await this.#fetchEmails(user!.ghAccessToken);
     return emails;
   }
 
@@ -53,8 +55,8 @@ export class OauthService {
     });
     const json = (await body.json()) as GithubTokenResponse;
     const scopes = json.scope.split(',');
-    if (!(scopes.includes('user') || scopes.includes('user:email'))) {
-      throw new Error();
+    if (!scopes.includes('user:email')) {
+      throw new UnauthorizedException();
     }
     return json.access_token;
   }

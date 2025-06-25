@@ -1,5 +1,5 @@
 services:
-  commiter:
+  ghbot:
     build:
       context: .
       dockerfile: docker/ghBot.Dockerfile
@@ -24,6 +24,7 @@ services:
       - microservices-network
     depends_on:
       - mongo
+      - ghbot
     env_file:
       - apps/server/.env
 

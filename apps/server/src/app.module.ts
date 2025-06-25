@@ -6,7 +6,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import configuration from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { join } from 'path';
+import { CommitterModule } from './committer/committer.module';
 
+console.log(join(process.cwd(), './apps/frontend', 'dist'));
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -15,7 +17,7 @@ import { join } from 'path';
     }),
 
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), './apps/server', 'public'),
+      rootPath: join(process.cwd(), './apps/frontend', 'dist'),
     }),
 
     MongooseModule.forRootAsync({
@@ -27,6 +29,7 @@ import { join } from 'path';
 
     AuthModule,
     OauthModule,
+    CommitterModule,
   ],
 })
 export class AppModule {}

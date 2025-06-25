@@ -23,8 +23,8 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new UnauthorizedException();
     const user = await this.userModel.findOne({ id: token }).exec();
     if (!user) throw new UnauthorizedException();
-    req.ghAccessToken = user.ghAccessToken;
-    if (user.lastCheckedAt.getTime() - checkTimeout < new Date().getTime()) {
+    req.user = user;
+    if (user.lastCheckedAt.getTime() + checkTimeout < new Date().getTime()) {
       const valid = await this.oauthService.validateToken(user.ghAccessToken);
       if (!valid) {
         await user.deleteOne();

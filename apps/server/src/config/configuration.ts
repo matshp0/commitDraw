@@ -7,4 +7,5 @@ export default () => ({
     id: process.env.GITHUB_OAUTH_CLIENT_ID || 'id',
     secret: process.env.GITHUB_OAUTH_CLIENT_SECRET || 'secret',
   },
+  ghBotUrl: process.env.GH_BOT_URL,
 });

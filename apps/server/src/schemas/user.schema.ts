@@ -3,6 +3,13 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
+type Email = {
+  email: string;
+  visibility: string | null;
+  verified: boolean;
+  primary: boolean;
+};
+
 @Schema()
 export class User {
   @Prop()
@@ -13,6 +20,9 @@ export class User {
 
   @Prop()
   lastCheckedAt: Date;
+
+  @Prop()
+  emails: Email[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
