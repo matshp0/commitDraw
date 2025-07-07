@@ -10,4 +10,5 @@ export default Joi.object({
   REPOSITORIES_PATH: Joi.string().required(),
 
   GH_PROCCESS_ACCESS_TOKEN: Joi.string().required(),
+  GH_USERNAME: Joi.string().required(),
 });

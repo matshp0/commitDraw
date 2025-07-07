@@ -16,6 +16,7 @@ import { CommitDateDto } from '../dto/createCommits.dto';
 interface GhAppConfig {
   privateAccessToken: string;
   repositoriesPath: string;
+  username: string;
 }
 
 @Injectable()
@@ -24,6 +25,7 @@ export class GhApp {
   private readonly maxCommitsInBranch: number = 999;
   private readonly appConfig: GhAppConfig;
   private inProgress: Set<string> = new Set();
+  private user: string;
   private readonly brightessCommit: Record<number, number> = {
     1: 1,
     2: 2,
@@ -33,6 +35,7 @@ export class GhApp {
 
   constructor(private configService: ConfigService) {
     this.appConfig = this.configService.get<GhAppConfig>('ghApp')!;
+    this.user = this.appConfig.username;
     this.octokit = new Octokit({
       auth: this.appConfig.privateAccessToken,
     });
@@ -52,9 +55,9 @@ export class GhApp {
     }
     this.inProgress.add(fork);
     try {
-      await this.#deleteRepository('matshp0', fork);
+      await this.#deleteRepository(this.user, fork);
       await this.#forkRepository(user, repository, fork);
-      await this.#getCommitData('matshp0', fork);
+      await this.#getCommitData(this.user, fork);
       const branches = await this.#drawCommits(
         dates,
         user,
@@ -78,6 +81,7 @@ export class GhApp {
 
   async #forkRepository(owner: string, repo: string, fork: string) {
     try {
+      console.log(fork);
       const { data } = await this.octokit.request(
         'POST /repos/{owner}/{repo}/forks',
         {
@@ -87,8 +91,10 @@ export class GhApp {
           default_branch_only: true,
         },
       );
+      console.log(data);
       return data;
     } catch (err) {
+      console.log(err);
       if (err instanceof RequestError) {
         if (err.status === 404)
           throw new BadRequestException(
@@ -121,7 +127,7 @@ export class GhApp {
         owner: user,
         repo,
         title: 'Pull request created by commitDraw',
-        head: `matshp0:${branch}`,
+        head: `${this.user}:${branch}`,
         base: 'main',
       },
     );
@@ -131,6 +137,7 @@ export class GhApp {
   async #getCommitData(owner: string, repo: string) {
     const maxRetries = 10;
     const timeout = 200;
+    console.log(owner, repo);
 
     for (let i = 0; i < maxRetries; i++) {
       try {
@@ -182,7 +189,7 @@ export class GhApp {
 
     const gitBase = simpleGit(join(this.appConfig.repositoriesPath));
     await gitBase.clone(
-      `https://${this.appConfig.privateAccessToken}@github.com/matshp0/${repoName}.git`,
+      `https://${this.appConfig.privateAccessToken}@github.com/${this.user}/${repoName}.git`,
       repoPath,
       ['--depth=1'],
     );

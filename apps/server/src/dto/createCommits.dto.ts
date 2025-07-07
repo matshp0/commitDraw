@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
   IsArray,
   IsDateString,
   IsEmail,
@@ -23,6 +24,7 @@ export class CommitDateDto {
 
 export class CreateCommitsDto {
   @IsArray()
+  @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => CommitDateDto)
   dates: CommitDateDto[];
