@@ -8,7 +8,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { join } from 'path';
 import { CommitterModule } from './committer/committer.module';
 
-console.log(join(process.cwd(), './apps/frontend', 'dist'));
 @Module({
   imports: [
     ConfigModule.forRoot({

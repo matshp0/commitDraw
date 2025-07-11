@@ -16,7 +16,6 @@ import { CommitDateDto } from '../dto/createCommits.dto';
 interface GhAppConfig {
   privateAccessToken: string;
   repositoriesPath: string;
-  username: string;
 }
 
 @Injectable()
@@ -35,10 +34,13 @@ export class GhApp {
 
   constructor(private configService: ConfigService) {
     this.appConfig = this.configService.get<GhAppConfig>('ghApp')!;
-    this.user = this.appConfig.username;
     this.octokit = new Octokit({
       auth: this.appConfig.privateAccessToken,
     });
+  }
+
+  async onModuleInit() {
+    this.user = await this.#getUsername();
   }
 
   async createCommits(
@@ -79,9 +81,13 @@ export class GhApp {
     }
   }
 
+  async #getUsername() {
+    const { data } = await this.octokit.request('GET /user');
+    return data.login;
+  }
+
   async #forkRepository(owner: string, repo: string, fork: string) {
     try {
-      console.log(fork);
       const { data } = await this.octokit.request(
         'POST /repos/{owner}/{repo}/forks',
         {
@@ -91,10 +97,8 @@ export class GhApp {
           default_branch_only: true,
         },
       );
-      console.log(data);
       return data;
     } catch (err) {
-      console.log(err);
       if (err instanceof RequestError) {
         if (err.status === 404)
           throw new BadRequestException(
@@ -137,7 +141,6 @@ export class GhApp {
   async #getCommitData(owner: string, repo: string) {
     const maxRetries = 10;
     const timeout = 200;
-    console.log(owner, repo);
 
     for (let i = 0; i < maxRetries; i++) {
       try {

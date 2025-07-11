@@ -1,12 +1,26 @@
 import React, { type FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { type ApiError, type CommitDate, type CommitRequest, type CommitResponse, type EmailsResponse } from '../types/api.types';
+import {
+  type ApiError,
+  type CommitDate,
+  type CommitRequest,
+  type CommitResponse,
+  type EmailsResponse,
+} from '../types/api.types';
 import { dayOfYearToDate, isLeapYear } from '../helpers/dates';
 import ModalWindow from './InfoWindow';
 import type { Action } from '../types/grid.types';
 
 const colors = ['#151B23', '#033A16', '#196C2E', '#2EA043', '#56D364'];
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const daysOfWeek = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 
 const App: FC = () => {
   const rows = 7;
@@ -16,7 +30,9 @@ const App: FC = () => {
   const [year, setYear] = useState<number>(2025);
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [gridState, setGridState] = useState<string[][]>(
-    Array(rows).fill(null).map(() => Array(cols).fill(null))
+    Array(rows)
+      .fill(null)
+      .map(() => Array(cols).fill(null)),
   );
   const [repoUrl, setRepoUrl] = useState<string>('');
   const [emails, setEmails] = useState<EmailsResponse>([]);
@@ -31,7 +47,9 @@ const App: FC = () => {
   const daysInYear = isLeapYear(year) ? 366 : 365;
 
   useEffect(() => {
-    const newGrid = Array(rows).fill(null).map(() => Array(cols).fill(null));
+    const newGrid = Array(rows)
+      .fill(null)
+      .map(() => Array(cols).fill(null));
     const firstDay = new Date(`${year}-01-01`).getDay();
     for (let day = 0; day < daysInYear; day++) {
       const row = (firstDay + day) % 7;
@@ -78,7 +96,7 @@ const App: FC = () => {
         if (!response.ok) {
           throw new Error(`Network response was not ok: ${response.status}`);
         }
-        const data = await response.json() as EmailsResponse;
+        const data = (await response.json()) as EmailsResponse;
         setEmails(data);
         const primaryEmail = data.find((email) => email.primary)?.email;
         setEmail(primaryEmail);
@@ -98,10 +116,14 @@ const App: FC = () => {
     return dayOfYearToDate(dayOffset, year);
   };
 
-  const handleCellChange = (row: number, col: number, color: string = selectedColor) => {
+  const handleCellChange = (
+    row: number,
+    col: number,
+    color: string = selectedColor,
+  ) => {
     if (gridState[row][col] === null) return;
     const newGrid = gridState.map((r, i) =>
-      i === row ? r.map((cell, j) => (j === col ? color : cell)) : r
+      i === row ? r.map((cell, j) => (j === col ? color : cell)) : r,
     );
     setGridState(newGrid);
   };
@@ -175,7 +197,9 @@ const App: FC = () => {
 
       if (!response.ok) {
         const errorData: ApiError = await response.json();
-        throw new Error(errorData.message || `Request failed with status ${response.status}`);
+        throw new Error(
+          errorData.message || `Request failed with status ${response.status}`,
+        );
       }
 
       const result: CommitResponse = await response.json();
@@ -185,25 +209,42 @@ const App: FC = () => {
       }
     } catch (error) {
       console.error('Commit error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to create commits');
+      setError(
+        error instanceof Error ? error.message : 'Failed to create commits',
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const years = Array.from({ length: 2025 - 1970 + 1 }, (_, i) => 1970 + i).reverse();
+  const years = Array.from(
+    { length: 2025 - 1970 + 1 },
+    (_, i) => 1970 + i,
+  ).reverse();
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '16px',
+      }}
       className="flex flex-col items-center p-4"
       onMouseUp={() => setIsMouseDown(false)}
       onMouseLeave={() => setIsMouseDown(false)}
     >
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+      <div
+        style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}
+      >
         <ModalWindow />
         <h1
-          style={{ fontSize: '24px', fontWeight: 'bold', color: '#E5E7EB', marginRight: '16px' }}
+          style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#E5E7EB',
+            marginRight: '16px',
+          }}
           className="text-2xl font-bold text-gray-200"
         >
           CommitDraw
@@ -248,15 +289,24 @@ const App: FC = () => {
         ))}
       </div>
       {pullRequests.length > 0 ? (
-        <div style={{ marginBottom: '16px' }} className="flex flex-col items-center">
-          <p style={{ color: '#56D364', marginBottom: '8px' }}>Pull request(s) created:</p>
+        <div
+          style={{ marginBottom: '16px' }}
+          className="flex flex-col items-center"
+        >
+          <p style={{ color: '#56D364', marginBottom: '8px' }}>
+            Pull request(s) created:
+          </p>
           {pullRequests.map((url, index) => (
             <a
               key={index}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: '#56D364', textDecoration: 'underline', marginBottom: '4px' }}
+              style={{
+                color: '#56D364',
+                textDecoration: 'underline',
+                marginBottom: '4px',
+              }}
               className="text-green-400 hover:underline"
               aria-label={`Open pull request ${index + 1} in a new tab`}
             >
@@ -266,7 +316,9 @@ const App: FC = () => {
         </div>
       ) : (
         successMessage && (
-          <p style={{ color: '#56D364', marginBottom: '16px' }}>{successMessage}</p>
+          <p style={{ color: '#56D364', marginBottom: '16px' }}>
+            {successMessage}
+          </p>
         )
       )}
       {error && (
@@ -325,14 +377,26 @@ const App: FC = () => {
                 className={`rounded-sm transition-all duration-300 ease-in-out ${cell !== null ? 'cursor-pointer' : 'cursor-default'}`}
                 title={getDateForCell(rowIndex, colIndex)}
               ></div>
-            ))
+            )),
           )}
         </div>
       </div>
       <div style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', alignItems: 'flex-start' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '10px',
+            alignItems: 'flex-start',
+          }}
+        >
           <h1
-            style={{ fontSize: '14px', color: '#E5E7EB', marginRight: '16px', width: '132px' }}
+            style={{
+              fontSize: '14px',
+              color: '#E5E7EB',
+              marginRight: '16px',
+              width: '132px',
+            }}
             className="text-2xl font-bold text-gray-200"
           >
             Email used to commit:
@@ -362,17 +426,26 @@ const App: FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', alignItems: 'flex-start' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '10px',
+            alignItems: 'flex-start',
+          }}
+        >
           <button
             onClick={handleCommit}
             disabled={isLoading || !email || !repoUrl}
             style={{
               padding: '8px 16px',
-              backgroundColor: isLoading || !email || !repoUrl ? '#4B5563' : '#1F6FEB',
+              backgroundColor:
+                isLoading || !email || !repoUrl ? '#4B5563' : '#1F6FEB',
               color: '#E5E7EB',
               border: '1px solid #6B7280',
               borderRadius: '4px',
-              cursor: isLoading || !email || !repoUrl ? 'not-allowed' : 'pointer',
+              cursor:
+                isLoading || !email || !repoUrl ? 'not-allowed' : 'pointer',
               flexShrink: 0,
             }}
             className="text-sm hover:bg-gray-700"
